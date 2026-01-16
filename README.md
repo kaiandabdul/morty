@@ -1,64 +1,46 @@
 # Ralphy - Autonomous AI Coding Loop
 
-Ralphy is a bash script that runs AI coding assistants (Claude Code or OpenCode) in an autonomous loop, working through tasks in your PRD until everything is complete.
+Ralphy is a bash script that runs AI coding assistants (Claude Code or OpenCode) in an autonomous loop, working through tasks until everything is complete.
 
 ## Features
 
 - **Multi-engine support**: Works with both Claude Code and OpenCode
-- **Autonomous loop**: Runs until all PRD tasks are complete
-- **Progress visualization**: Real-time spinner with color-coded step detection
+- **Multiple PRD formats**: Markdown, YAML, or GitHub Issues
+- **Parallel execution**: Run independent tasks concurrently
+- **Git branch workflow**: Create feature branches and PRs automatically
 - **Retry logic**: Automatic retries with configurable delay on failures
+- **Progress visualization**: Real-time spinner with color-coded step detection
 - **Cost tracking**: Token usage and cost estimation at completion
-- **Cross-platform notifications**: macOS, Linux, and Windows support
-- **Iteration limits**: Optional max iterations to prevent runaway loops
-- **Dry-run mode**: Preview what would be done without executing
+- **Cross-platform**: macOS, Linux, and Windows support
 
 ## Prerequisites
 
 - [Claude Code CLI](https://github.com/anthropics/claude-code) or [OpenCode CLI](https://opencode.ai/docs/)
 - `jq` for JSON parsing
+- `yq` for YAML parsing (optional, only if using YAML tasks)
+- `gh` for GitHub integration (optional, only if using GitHub Issues)
 - `bc` for cost calculation (optional)
 
-## Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/ralphy.git
-   cd ralphy
-   ```
-
-2. Make the script executable:
-   ```bash
-   chmod +x ralphy.sh
-   ```
-
-3. Create a `PRD.md` file in your project directory with tasks formatted as:
-   ```markdown
-   # My Project PRD
-
-   ## Tasks
-   - [ ] Implement user authentication
-   - [ ] Add dashboard page
-   - [ ] Create API endpoints
-   ```
-
-## Usage
-
-Run Ralphy from your project directory:
+## Quick Start
 
 ```bash
+# Clone and setup
+git clone https://github.com/yourusername/ralphy.git
+chmod +x ralphy.sh
+
+# Create a PRD.md with tasks
+cat > PRD.md << 'EOF'
+# My Project
+
+## Tasks
+- [ ] Create user authentication
+- [ ] Add dashboard page
+- [ ] Build API endpoints
+EOF
+
+# Run Ralphy
 ./ralphy.sh
 ```
-
-Ralphy will:
-1. Find the next incomplete task (`- [ ]`) in your PRD.md
-2. Implement the feature
-3. Write and run tests (unless skipped)
-4. Run linting (unless skipped)
-5. Update PRD.md to mark the task complete (`- [x]`)
-6. Log progress to progress.txt
-7. Commit the changes
-8. Repeat until all tasks are done
 
 ## AI Engine Selection
 
@@ -67,29 +49,117 @@ Ralphy will:
 | `--claude` | Use Claude Code (default) |
 | `--opencode` | Use OpenCode instead of Claude Code |
 
-### Examples
-
 ```bash
-# Run with Claude Code (default)
-./ralphy.sh
-
-# Run with OpenCode
 ./ralphy.sh --opencode
-
-# Fast mode with OpenCode
-./ralphy.sh --opencode --fast
 ```
 
-## Workflow Options
+## PRD Sources
 
+Ralphy supports three task sources:
+
+### 1. Markdown (default)
+
+```bash
+./ralphy.sh --prd PRD.md
+```
+
+Format:
+```markdown
+# Project PRD
+
+## Tasks
+- [ ] Task one
+- [ ] Task two
+- [x] Completed task
+```
+
+### 2. YAML
+
+```bash
+./ralphy.sh --yaml tasks.yaml
+```
+
+Format:
+```yaml
+tasks:
+  - title: Implement user login
+    completed: false
+    parallel_group: 1  # Optional: tasks with same group can run in parallel
+  
+  - title: Implement user signup  
+    completed: false
+    parallel_group: 1  # Same group as login - can run together
+  
+  - title: Add password reset
+    completed: false
+    parallel_group: 2  # Different group - runs after group 1
+```
+
+### 3. GitHub Issues
+
+```bash
+./ralphy.sh --github owner/repo
+./ralphy.sh --github owner/repo --github-label "ready"
+```
+
+Uses open issues from the specified repository. Issues are closed automatically when completed.
+
+## Parallel Execution
+
+Run multiple independent tasks concurrently:
+
+```bash
+# Run up to 3 tasks in parallel (default)
+./ralphy.sh --parallel
+
+# Run up to 5 tasks in parallel
+./ralphy.sh --parallel --max-parallel 5
+```
+
+When using YAML format, you can group tasks that can run together:
+
+```yaml
+tasks:
+  - title: Create User model
+    parallel_group: 1
+  - title: Create Post model
+    parallel_group: 1  # Runs with User model
+  - title: Add relationships
+    parallel_group: 2  # Runs after group 1 completes
+```
+
+## Git Branch Workflow
+
+Create a separate branch for each task with optional PR creation:
+
+```bash
+# Create feature branches
+./ralphy.sh --branch-per-task
+
+# Specify base branch (default: current branch)
+./ralphy.sh --branch-per-task --base-branch main
+
+# Create PRs automatically
+./ralphy.sh --branch-per-task --create-pr
+
+# Create draft PRs
+./ralphy.sh --branch-per-task --create-pr --draft-pr
+```
+
+Branch naming: `ralphy/<slugified-task-name>`
+
+Example: Task "Add user authentication" → Branch `ralphy/add-user-authentication`
+
+## All Options
+
+### Workflow Options
 | Flag | Description |
 |------|-------------|
 | `--no-tests` | Skip writing and running tests |
 | `--no-lint` | Skip linting |
 | `--fast` | Skip both tests and linting |
 
-## Execution Options
-
+### Execution Options
 | Flag | Description |
 |------|-------------|
 | `--max-iterations N` | Stop after N iterations (0 = unlimited) |
@@ -97,8 +167,29 @@ Ralphy will:
 | `--retry-delay N` | Seconds between retries (default: 5) |
 | `--dry-run` | Show what would be done without executing |
 
-## Other Options
+### Parallel Options
+| Flag | Description |
+|------|-------------|
+| `--parallel` | Run independent tasks in parallel |
+| `--max-parallel N` | Max concurrent tasks (default: 3) |
 
+### Git Branch Options
+| Flag | Description |
+|------|-------------|
+| `--branch-per-task` | Create a new git branch for each task |
+| `--base-branch NAME` | Base branch to create task branches from |
+| `--create-pr` | Create a pull request after each task |
+| `--draft-pr` | Create PRs as drafts |
+
+### PRD Source Options
+| Flag | Description |
+|------|-------------|
+| `--prd FILE` | PRD file path (default: PRD.md) |
+| `--yaml FILE` | Use YAML task file instead of markdown |
+| `--github REPO` | Fetch tasks from GitHub issues (e.g., owner/repo) |
+| `--github-label TAG` | Filter GitHub issues by label |
+
+### Other Options
 | Flag | Description |
 |------|-------------|
 | `-v, --verbose` | Show debug output |
@@ -108,112 +199,73 @@ Ralphy will:
 ## Examples
 
 ```bash
-# Full mode with tests and linting (Claude Code)
+# Basic usage with Claude Code
 ./ralphy.sh
 
-# Use OpenCode instead
-./ralphy.sh --opencode
+# Use OpenCode with fast mode
+./ralphy.sh --opencode --fast
 
-# Skip tests only
-./ralphy.sh --no-tests
+# Feature branch workflow with PRs
+./ralphy.sh --branch-per-task --create-pr --base-branch main
 
-# Skip linting only
-./ralphy.sh --no-lint
+# Parallel execution with GitHub Issues
+./ralphy.sh --github myorg/myrepo --parallel --max-parallel 4
 
-# Fast mode - skip both tests and linting
-./ralphy.sh --fast
+# YAML tasks with parallel groups
+./ralphy.sh --yaml tasks.yaml --parallel
 
-# Limit to 5 iterations
-./ralphy.sh --max-iterations 5
+# Limit iterations and create draft PRs
+./ralphy.sh --max-iterations 5 --branch-per-task --create-pr --draft-pr
 
-# Preview without executing
-./ralphy.sh --dry-run
-
-# Combine options
-./ralphy.sh --opencode --fast --max-iterations 10
+# Dry run to preview
+./ralphy.sh --dry-run --verbose
 ```
-
-## Required Files
-
-| File | Required | Description |
-|------|----------|-------------|
-| `PRD.md` | Yes | Your product requirements with checkbox tasks |
-| `progress.txt` | No | Created automatically if missing; logs progress |
 
 ## Progress Indicator
 
 The progress indicator shows:
 - **Spinner**: Animated status indicator
-- **Current step**: Color-coded step name (Thinking, Reading code, Implementing, Writing tests, Testing, Linting, Staging, Committing)
+- **Current step**: Color-coded (Thinking → Reading → Implementing → Testing → Committing)
 - **Task name**: Current task being worked on
 - **Elapsed time**: Time spent on current task
-
-Step colors:
-- 🔵 Cyan: Thinking, Reading code
-- 🟣 Magenta: Implementing, Writing tests
-- 🟡 Yellow: Testing, Linting
-- 🟢 Green: Staging, Committing
-
-## How It Works
-
-### Claude Code Mode
-Uses Claude Code's `--dangerously-skip-permissions` flag to run autonomously without confirmation prompts.
-
-### OpenCode Mode
-Uses OpenCode's `run` command with `OPENCODE_PERMISSION='{"*":"allow"}'` environment variable for autonomous operation.
-
-Each iteration:
-1. Reads your PRD.md and progress.txt for context
-2. Identifies the highest-priority incomplete task
-3. Implements the feature with tests and linting (unless skipped)
-4. Marks the task complete and commits
-5. Outputs `<promise>COMPLETE</promise>` when all tasks are done
 
 ## Cost Tracking
 
 At completion, Ralphy displays:
-- Total input tokens
-- Total output tokens
+- Total input/output tokens
 - Estimated cost (based on Claude API pricing)
+- Branches created (if using `--branch-per-task`)
 
-## Cross-Platform Notifications
+## How It Works
 
-Ralphy sends notifications when complete:
+1. **Read tasks** from PRD.md, YAML file, or GitHub Issues
+2. **Create branch** (optional) for the task
+3. **Send prompt** to AI with task context
+4. **AI implements** the feature, writes tests, runs linting
+5. **Mark complete** and commit changes
+6. **Create PR** (optional) for the branch
+7. **Repeat** until all tasks are done
 
-| Platform | Notification | Sound |
-|----------|--------------|-------|
-| macOS | Native notification | Glass.aiff |
-| Linux | notify-send | freedesktop complete sound |
-| Windows | PowerShell | System asterisk |
+### Autonomous Operation
 
-## Error Handling
-
-- **Retry logic**: Failed API calls retry up to 3 times (configurable)
-- **Graceful degradation**: Missing optional tools (bc) don't break execution
-- **Clean shutdown**: Ctrl+C gracefully stops and cleans up
-- **Error recovery**: Continues to next task after max retries exceeded
-
-## Tips
-
-- Keep PRD tasks small and focused for best results
-- Use `--fast` for rapid prototyping, then run tests separately
-- Use `--max-iterations` when you want controlled execution
-- Check `progress.txt` for a log of what was done
-- Use `--dry-run` to preview the prompt before executing
-- Press Ctrl+C to stop gracefully at any time
+- **Claude Code**: Uses `--dangerously-skip-permissions` flag
+- **OpenCode**: Uses `OPENCODE_PERMISSION='{"*":"allow"}'` environment variable
 
 ## Changelog
 
+### v3.0.0
+- Added parallel task execution (`--parallel`, `--max-parallel`)
+- Added git branch per task (`--branch-per-task`, `--create-pr`, `--draft-pr`)
+- Added multiple PRD formats (Markdown, YAML, GitHub Issues)
+- Added YAML parallel groups for controlled concurrency
+- Improved task interface abstraction
+
 ### v2.0.0
 - Added OpenCode support (`--opencode` flag)
-- Refactored architecture for better maintainability
 - Added retry logic with configurable retries and delay
-- Added `--max-iterations` flag
-- Added `--dry-run` mode
+- Added `--max-iterations`, `--dry-run`, `--verbose` flags
 - Improved progress UI with colors
-- Added cross-platform notification support (Linux/Windows)
-- Added `--verbose` flag for debugging
-- Better error handling and recovery
+- Added cross-platform notification support
 
 ### v1.0.0
 - Initial release with Claude Code support
