@@ -2,7 +2,7 @@
 
 # ============================================
 # Ralphy - Autonomous AI Coding Loop
-# Supports Claude Code, OpenCode, Codex, Cursor, and Qwen-Code
+# Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid
 # Runs until PRD is complete
 # ============================================
 
@@ -12,12 +12,12 @@ set -euo pipefail
 # CONFIGURATION & DEFAULTS
 # ============================================
 
-VERSION="3.1.0"
+VERSION="3.3.0"
 
 # Runtime options
 SKIP_TESTS=false
 SKIP_LINT=false
-AI_ENGINE="claude"  # claude, opencode, cursor, codex, or qwen
+AI_ENGINE="claude"  # claude, opencode, cursor, codex, qwen, or droid
 DRY_RUN=false
 MAX_ITERATIONS=0  # 0 = unlimited
 MAX_RETRIES=3
@@ -120,6 +120,7 @@ ${BOLD}AI ENGINE OPTIONS:${RESET}
   --cursor            Use Cursor agent
   --codex             Use Codex CLI
   --qwen              Use Qwen-Code
+  --droid             Use Factory Droid
 
 ${BOLD}WORKFLOW OPTIONS:${RESET}
   --no-tests          Skip writing and running tests
@@ -158,6 +159,7 @@ ${BOLD}EXAMPLES:${RESET}
   ./ralphy.sh --codex                      # Run with Codex CLI
   ./ralphy.sh --opencode                   # Run with OpenCode
   ./ralphy.sh --cursor                     # Run with Cursor agent
+  ./ralphy.sh --droid                      # Run with Factory Droid
   ./ralphy.sh --branch-per-task --create-pr  # Feature branch workflow
   ./ralphy.sh --parallel --max-parallel 4  # Run 4 tasks concurrently
   ./ralphy.sh --yaml tasks.yaml            # Use YAML task file
@@ -221,6 +223,10 @@ parse_args() {
         ;;
       --qwen)
         AI_ENGINE="qwen"
+        shift
+        ;;
+      --droid)
+        AI_ENGINE="droid"
         shift
         ;;
       --dry-run)
@@ -371,6 +377,12 @@ check_requirements() {
       if ! command -v qwen &>/dev/null; then
         log_error "Qwen-Code CLI not found."
         log_info "Make sure 'qwen' is in your PATH."
+        exit 1
+      fi
+      ;;
+    droid)
+      if ! command -v droid &>/dev/null; then
+        log_error "Factory Droid CLI not found. Install from https://docs.factory.ai/cli/getting-started/quickstart"
         exit 1
       fi
       ;;
@@ -940,6 +952,12 @@ run_ai_command() {
         --approval-mode yolo \
         -p "$prompt" > "$output_file" 2>&1 &
       ;;
+    droid)
+      # Droid: use exec with stream-json output and medium autonomy for development
+      droid exec --output-format stream-json \
+        --auto medium \
+        "$prompt" > "$output_file" 2>&1 &
+      ;;
     codex)
       CODEX_LAST_MESSAGE_FILE="${output_file}.last"
       rm -f "$CODEX_LAST_MESSAGE_FILE"
@@ -1036,6 +1054,27 @@ parse_ai_result() {
       if [[ -z "$response" ]]; then
         response="Task completed"
       fi
+      ;;
+    droid)
+      # Droid stream-json parsing
+      # Look for completion event which has the final result
+      local completion_line
+      completion_line=$(echo "$result" | grep '"type":"completion"' | tail -1)
+
+      if [[ -n "$completion_line" ]]; then
+        response=$(echo "$completion_line" | jq -r '.finalText // "Task completed"' 2>/dev/null || echo "Task completed")
+        # Droid provides duration_ms in completion event
+        local dur_ms
+        dur_ms=$(echo "$completion_line" | jq -r '.durationMs // 0' 2>/dev/null || echo "0")
+        if [[ "$dur_ms" =~ ^[0-9]+$ ]] && [[ "$dur_ms" -gt 0 ]]; then
+          # Store duration for tracking
+          actual_cost="duration:$dur_ms"
+        fi
+      fi
+
+      # Tokens remain 0 for Droid (not exposed in exec mode)
+      input_tokens=0
+      output_tokens=0
       ;;
     codex)
       if [[ -n "$CODEX_LAST_MESSAGE_FILE" ]] && [[ -f "$CODEX_LAST_MESSAGE_FILE" ]]; then
@@ -1449,6 +1488,14 @@ Focus only on implementing: $task_name"
           qwen --output-format stream-json \
             --approval-mode yolo \
             -p "$prompt"
+        ) > "$tmpfile" 2>>"$log_file"
+        ;;
+      droid)
+        (
+          cd "$worktree_dir"
+          droid exec --output-format stream-json \
+            --auto medium \
+            "$prompt"
         ) > "$tmpfile" 2>>"$log_file"
         ;;
       codex)
@@ -1925,6 +1972,11 @@ Be careful to preserve functionality from BOTH branches. The goal is to integrat
                 --approval-mode yolo \
                 -p "$resolve_prompt" > "$resolve_tmpfile" 2>&1
               ;;
+            droid)
+              droid exec --output-format stream-json \
+                --auto medium \
+                "$resolve_prompt" > "$resolve_tmpfile" 2>&1
+              ;;
             codex)
               codex exec --full-auto \
                 --json \
@@ -1986,9 +2038,9 @@ show_summary() {
   echo ""
   echo "${BOLD}>>> Cost Summary${RESET}"
   
-  # Cursor doesn't provide token usage, but does provide duration
-  if [[ "$AI_ENGINE" == "cursor" ]]; then
-    echo "${DIM}Token usage not available (Cursor CLI doesn't expose this data)${RESET}"
+  # Cursor and Droid don't provide token usage, but do provide duration
+  if [[ "$AI_ENGINE" == "cursor" ]] || [[ "$AI_ENGINE" == "droid" ]]; then
+    echo "${DIM}Token usage not available (CLI doesn't expose this data)${RESET}"
     if [[ "$total_duration_ms" -gt 0 ]]; then
       local dur_sec=$((total_duration_ms / 1000))
       local dur_min=$((dur_sec / 60))
@@ -2061,6 +2113,7 @@ main() {
     cursor) engine_display="${YELLOW}Cursor Agent${RESET}" ;;
     codex) engine_display="${BLUE}Codex${RESET}" ;;
     qwen) engine_display="${GREEN}Qwen-Code${RESET}" ;;
+    droid) engine_display="${MAGENTA}Factory Droid${RESET}" ;;
     *) engine_display="${MAGENTA}Claude Code${RESET}" ;;
   esac
   echo "Engine: $engine_display"
