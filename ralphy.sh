@@ -8,26 +8,6 @@
 
 set -euo pipefail
 
-# Check bash version (need 4.0+ for associative arrays and other features)
-if [[ -n "${BASH_VERSINFO:-}" ]] && [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-  echo "ERROR: Ralphy requires bash 4.0 or later. Current version: ${BASH_VERSION}"
-  echo "On Linux, install a newer bash with: apt-get install bash (Debian/Ubuntu) or yum install bash (RHEL/CentOS)"
-  exit 1
-fi
-
-# Detect OS for better error messages
-detect_os() {
-  case "$(uname -s)" in
-    Linux*) echo "linux" ;;
-    Darwin*) echo "macos" ;;
-    CYGWIN*|MINGW*|MSYS*) echo "windows" ;;
-    *) echo "unknown" ;;
-  esac
-}
-
-OS_TYPE=$(detect_os)
-
-
 # ============================================
 # CONFIGURATION & DEFAULTS
 # ============================================
