@@ -1,6 +1,6 @@
 {
   "name": "morty-cli",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Autonomous AI Coding Loop - Run AI agents on tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code, Factory Droid and GitHub Copilot",
   "type": "module",
   "main": "dist/index.js",

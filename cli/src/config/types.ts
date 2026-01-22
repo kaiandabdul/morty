@@ -97,6 +97,8 @@ export interface RuntimeOptions {
   modelOverride?: string;
   /** Skip automatic branch merging after parallel execution */
   skipMerge?: boolean;
+  /** Enable real-time dashboard */
+  dashboardEnabled?: boolean;
 }
 
 /**

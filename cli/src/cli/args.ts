@@ -53,6 +53,7 @@ export function createProgram(): Command {
       "--no-merge",
       "Skip automatic branch merging after parallel execution",
     )
+    .option("--dashboard", "Enable real-time dashboard (http://localhost:3847)")
     .option("-v, --verbose", "Verbose output");
 
   return program;
@@ -142,6 +143,7 @@ export function parseArgs(args: string[]): {
           : "auto",
     modelOverride,
     skipMerge: opts.merge === false,
+    dashboardEnabled: opts.dashboard || false,
   };
 
   return {
