@@ -21,7 +21,7 @@ morty --prd PRD.md
 **Option B: Clone**
 
 ```bash
-git clone https://github.com/michaelshimeles/morty.git
+git clone https://github.com/kaiandabdul/morty.git
 cd morty && chmod +x morty.sh
 
 ./morty.sh "add login button"

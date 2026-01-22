@@ -43,7 +43,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/michaelshimeles/morty"
+    "url": "https://github.com/kaiandabdul/morty"
   },
   "dependencies": {
     "commander": "^13.0.0",
