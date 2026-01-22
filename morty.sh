@@ -12,7 +12,7 @@ set -euo pipefail
 # CONFIGURATION & DEFAULTS
 # ============================================
 
-VERSION="4.3.0"
+VERSION="5.0.0"
 
 # Morty config directory
 MORTY_DIR=".morty"

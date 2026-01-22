@@ -22,7 +22,7 @@ function createConfigContent(
   detected: ReturnType<typeof detectProject>,
 ): string {
   return `# Morty Configuration
-# https://github.com/michaelshimeles/morty
+# https://github.com/kaiandabdul/morty
 
 # Project info (auto-detected, edit if needed)
 project:
