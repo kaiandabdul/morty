@@ -8,12 +8,12 @@ import { Footer } from "@/components/footer";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Ralphy",
+  name: "Morty",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "macOS, Linux, Windows",
   description:
     "Run AI agents on your tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid.",
-  url: "https://ralphy.goshen.fyi",
+  url: "https://morty.goshen.fyi",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -21,7 +21,7 @@ const jsonLd = {
   },
   author: {
     "@type": "Organization",
-    name: "Ralphy",
+    name: "Morty",
   },
 };
 

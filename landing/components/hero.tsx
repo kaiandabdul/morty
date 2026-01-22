@@ -5,7 +5,7 @@ import { Check, Copy, ChevronRight } from "lucide-react";
 
 export function Hero() {
   const [copied, setCopied] = useState(false);
-  const installCommand = "npm install -g ralphy-cli";
+  const installCommand = "npm install -g morty-cli";
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(installCommand);
@@ -17,7 +17,7 @@ export function Hero() {
     <section className="px-4 pt-12 pb-8">
       <div className="mx-auto max-w-xl">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-sm text-neutral-600">
-          <span>v4.1.0 available on npm</span>
+          <span>v5.0.0 available on npm</span>
           <ChevronRight className="h-3 w-3" />
         </div>
 
@@ -27,7 +27,7 @@ export function Hero() {
 
         <p className="text-neutral-600 mb-3">
           Run AI agents on your tasks until done. Give it a PRD, a task list, or
-          GitHub issues. Ralphy works through them one by one—or in parallel
+          GitHub issues. Morty works through them one by one—or in parallel
           using git worktrees.
         </p>
 
@@ -53,7 +53,7 @@ export function Hero() {
         <p className="mt-2 text-xs text-neutral-400">
           *Or clone from{" "}
           <a
-            href="https://github.com/michaelshimeles/ralphy"
+            href="https://github.com/michaelshimeles/morty"
             className="underline hover:text-neutral-600"
           >
             GitHub

@@ -6,14 +6,14 @@ export function Footer() {
           <span>MIT License</span>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/michaelshimeles/ralphy"
+              href="https://github.com/michaelshimeles/morty"
               target="_blank"
               className="underline hover:text-neutral-800"
             >
               github
             </a>
             <a
-              href="https://www.npmjs.com/package/ralphy-cli"
+              href="https://www.npmjs.com/package/morty-cli"
               target="_blank"
               className="underline hover:text-neutral-800"
             >

@@ -8,7 +8,7 @@ export function Features() {
           <p>
             <strong className="text-neutral-800">Task sources.</strong> Define
             tasks in Markdown PRDs, YAML files, or pull directly from GitHub
-            Issues. Ralphy works through each task sequentially or in parallel.
+            Issues. Morty works through each task sequentially or in parallel.
           </p>
 
           <p>
@@ -25,15 +25,15 @@ export function Features() {
 
           <p>
             <strong className="text-neutral-800">Project rules.</strong> Define
-            rules and boundaries in <code>.ralphy/</code>. The AI follows your
+            rules and boundaries in <code>.morty/</code>. The AI follows your
             conventions: "use TypeScript", "never modify migrations", etc.
           </p>
 
           <p>
             <strong className="text-neutral-800">Tests and linting.</strong>{" "}
             Tests are written and run by default. Linting runs before completing
-            tasks. Skip with <code>--skip-tests</code>, <code>--skip-lint</code>,
-            or <code>--fast</code>.
+            tasks. Skip with <code>--skip-tests</code>, <code>--skip-lint</code>
+            , or <code>--fast</code>.
           </p>
 
           <p>

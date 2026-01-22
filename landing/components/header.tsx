@@ -8,12 +8,12 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 text-neutral-800">
           <Image
             src="/logo.png"
-            alt="Ralphy"
+            alt="Morty"
             width={32}
             height={32}
             className="rounded"
           />
-          <span className="font-medium">ralphy</span>
+          <span className="font-medium">morty</span>
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">
@@ -30,7 +30,7 @@ export function Header() {
             usage
           </Link>
           <Link
-            href="https://github.com/michaelshimeles/ralphy"
+            href="https://github.com/michaelshimeles/morty"
             target="_blank"
             className="text-neutral-500 hover:text-neutral-800 underline"
           >
@@ -44,7 +44,7 @@ export function Header() {
             discord
           </Link>
           <Link
-            href="https://www.npmjs.com/package/ralphy-cli"
+            href="https://www.npmjs.com/package/morty-cli"
             target="_blank"
             className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-700"
           >

@@ -1,19 +1,28 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import YAML from "yaml";
 import { detectProject } from "./detector.ts";
 import {
-	getConfigPath,
-	getProgressPath,
-	getRalphyDir,
+  getConfigPath,
+  getProgressPath,
+  getMortyDir,
+  MORTY_DIR,
 } from "./loader.ts";
-import type { RalphyConfig } from "./types.ts";
+import type { MortyConfig } from "./types.ts";
 
 /**
  * Create the default config YAML content
  */
-function createConfigContent(detected: ReturnType<typeof detectProject>): string {
-	return `# Ralphy Configuration
-# https://github.com/michaelshimeles/ralphy
+function createConfigContent(
+  detected: ReturnType<typeof detectProject>,
+): string {
+  return `# Morty Configuration
+# https://github.com/michaelshimeles/morty
 
 # Project info (auto-detected, edit if needed)
 project:
@@ -54,80 +63,80 @@ boundaries:
  * Escape a value for safe YAML string
  */
 function escapeYaml(value: string | undefined | null): string {
-	return (value || "").replace(/"/g, '\\"');
+  return (value || "").replace(/"/g, '\\"');
 }
 
 /**
- * Initialize the .ralphy directory with config files
+ * Initialize the .morty directory with config files
  */
 export function initConfig(workDir = process.cwd()): {
-	created: boolean;
-	detected: ReturnType<typeof detectProject>;
+  created: boolean;
+  detected: ReturnType<typeof detectProject>;
 } {
-	const ralphyDir = getRalphyDir(workDir);
-	const configPath = getConfigPath(workDir);
-	const progressPath = getProgressPath(workDir);
+  const mortyDir = getMortyDir(workDir);
+  const configPath = getConfigPath(workDir);
+  const progressPath = getProgressPath(workDir);
 
-	// Detect project settings
-	const detected = detectProject(workDir);
+  // Detect project settings
+  const detected = detectProject(workDir);
 
-	// Create directory if it doesn't exist
-	if (!existsSync(ralphyDir)) {
-		mkdirSync(ralphyDir, { recursive: true });
-	}
+  // Create directory if it doesn't exist
+  if (!existsSync(mortyDir)) {
+    mkdirSync(mortyDir, { recursive: true });
+  }
 
-	// Create config file
-	const configContent = createConfigContent(detected);
-	writeFileSync(configPath, configContent, "utf-8");
+  // Create config file
+  const configContent = createConfigContent(detected);
+  writeFileSync(configPath, configContent, "utf-8");
 
-	// Create progress file
-	writeFileSync(progressPath, "# Ralphy Progress Log\n\n", "utf-8");
+  // Create progress file
+  writeFileSync(progressPath, "# Morty Progress Log\n\n", "utf-8");
 
-	return { created: true, detected };
+  return { created: true, detected };
 }
 
 /**
  * Add a rule to the config
  */
 export function addRule(rule: string, workDir = process.cwd()): void {
-	const configPath = getConfigPath(workDir);
+  const configPath = getConfigPath(workDir);
 
-	if (!existsSync(configPath)) {
-		throw new Error(`No config found. Run 'ralphy --init' first.`);
-	}
+  if (!existsSync(configPath)) {
+    throw new Error(`No config found. Run 'morty --init' first.`);
+  }
 
-	const content = readFileSync(configPath, "utf-8");
-	const parsed = YAML.parse(content) as RalphyConfig;
+  const content = readFileSync(configPath, "utf-8");
+  const parsed = YAML.parse(content) as MortyConfig;
 
-	// Ensure rules array exists
-	if (!parsed.rules) {
-		parsed.rules = [];
-	}
+  // Ensure rules array exists
+  if (!parsed.rules) {
+    parsed.rules = [];
+  }
 
-	// Add the rule
-	parsed.rules.push(rule);
+  // Add the rule
+  parsed.rules.push(rule);
 
-	// Write back
-	writeFileSync(configPath, YAML.stringify(parsed), "utf-8");
+  // Write back
+  writeFileSync(configPath, YAML.stringify(parsed), "utf-8");
 }
 
 /**
  * Log a task to the progress file
  */
 export function logTaskProgress(
-	task: string,
-	status: "completed" | "failed",
-	workDir = process.cwd(),
+  task: string,
+  status: "completed" | "failed",
+  workDir = process.cwd(),
 ): void {
-	const progressPath = getProgressPath(workDir);
+  const progressPath = getProgressPath(workDir);
 
-	if (!existsSync(progressPath)) {
-		return;
-	}
+  if (!existsSync(progressPath)) {
+    return;
+  }
 
-	const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
-	const icon = status === "completed" ? "✓" : "✗";
-	const line = `- [${icon}] ${timestamp} - ${task}\n`;
+  const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+  const icon = status === "completed" ? "✓" : "✗";
+  const line = `- [${icon}] ${timestamp} - ${task}\n`;
 
-	appendFileSync(progressPath, line, "utf-8");
+  appendFileSync(progressPath, line, "utf-8");
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================
-# Ralphy - Autonomous AI Coding Loop
+# Morty - Autonomous AI Coding Loop
 # Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid
 # Runs until PRD is complete
 # ============================================
@@ -14,10 +14,10 @@ set -euo pipefail
 
 VERSION="4.3.0"
 
-# Ralphy config directory
-RALPHY_DIR=".ralphy"
-PROGRESS_FILE="$RALPHY_DIR/progress.txt"
-CONFIG_FILE="$RALPHY_DIR/config.yaml"
+# Morty config directory
+MORTY_DIR=".morty"
+PROGRESS_FILE="$MORTY_DIR/progress.txt"
+CONFIG_FILE="$MORTY_DIR/config.yaml"
 SINGLE_TASK=""
 INIT_MODE=false
 SHOW_CONFIG=false
@@ -171,20 +171,20 @@ BROWSER_EOF
 }
 
 # ============================================
-# BROWNFIELD MODE (.ralphy/ configuration)
+# BROWNFIELD MODE (.morty/ configuration)
 # ============================================
 
-# Initialize .ralphy/ directory with config files
-init_ralphy_config() {
-  if [[ -d "$RALPHY_DIR" ]]; then
-    log_warn "$RALPHY_DIR already exists"
+# Initialize .morty/ directory with config files
+init_morty_config() {
+  if [[ -d "$MORTY_DIR" ]]; then
+    log_warn "$MORTY_DIR already exists"
     REPLY='N'  # Default if read times out or fails
     read -p "Overwrite config? [y/N] " -n 1 -r -t 30 2>/dev/null || true
     echo
     [[ ! $REPLY =~ ^[Yy]$ ]] && exit 0
   fi
 
-  mkdir -p "$RALPHY_DIR"
+  mkdir -p "$MORTY_DIR"
 
   # Smart detection
   local project_name=""
@@ -293,8 +293,8 @@ init_ralphy_config() {
 
   # Create config.yaml with detected values
   cat > "$CONFIG_FILE" << EOF
-# Ralphy Configuration
-# https://github.com/michaelshimeles/ralphy
+# Morty Configuration
+# https://github.com/michaelshimeles/morty
 
 # Project info (auto-detected, edit if needed)
 project:
@@ -334,22 +334,22 @@ capabilities:
 EOF
 
   # Create progress.txt
-  echo "# Ralphy Progress Log" > "$PROGRESS_FILE"
+  echo "# Morty Progress Log" > "$PROGRESS_FILE"
   echo "" >> "$PROGRESS_FILE"
 
-  log_success "Created $RALPHY_DIR/"
+  log_success "Created $MORTY_DIR/"
   echo ""
   echo "  ${CYAN}$CONFIG_FILE${RESET}   - Your rules and preferences"
   echo "  ${CYAN}$PROGRESS_FILE${RESET} - Progress log (auto-updated)"
   echo ""
   echo "${BOLD}Next steps:${RESET}"
-  echo "  1. Add rules:  ${CYAN}ralphy --add-rule \"your rule here\"${RESET}"
+  echo "  1. Add rules:  ${CYAN}morty --add-rule \"your rule here\"${RESET}"
   echo "  2. Or edit:    ${CYAN}$CONFIG_FILE${RESET}"
-  echo "  3. Run:        ${CYAN}ralphy \"your task\"${RESET} or ${CYAN}ralphy${RESET} (with PRD.md)"
+  echo "  3. Run:        ${CYAN}morty \"your task\"${RESET} or ${CYAN}morty${RESET} (with PRD.md)"
 }
 
 # Load rules from config.yaml
-load_ralphy_rules() {
+load_morty_rules() {
   [[ ! -f "$CONFIG_FILE" ]] && return
 
   if command -v yq &>/dev/null; then
@@ -358,7 +358,7 @@ load_ralphy_rules() {
 }
 
 # Load boundaries from config.yaml
-load_ralphy_boundaries() {
+load_morty_boundaries() {
   local boundary_type="$1"  # never_touch or always_test
   [[ ! -f "$CONFIG_FILE" ]] && return
 
@@ -381,14 +381,14 @@ load_browser_setting() {
 }
 
 # Show current config
-show_ralphy_config() {
+show_morty_config() {
   if [[ ! -f "$CONFIG_FILE" ]]; then
-    log_warn "No config found. Run 'ralphy --init' first."
+    log_warn "No config found. Run 'morty --init' first."
     exit 1
   fi
 
   echo ""
-  echo "${BOLD}Ralphy Configuration${RESET} ($CONFIG_FILE)"
+  echo "${BOLD}Morty Configuration${RESET} ($CONFIG_FILE)"
   echo ""
 
   if command -v yq &>/dev/null; then
@@ -427,7 +427,7 @@ show_ralphy_config() {
         echo "  • $rule"
       done
     else
-      echo "  ${DIM}(none - add with: ralphy --add-rule \"...\")${RESET}"
+      echo "  ${DIM}(none - add with: morty --add-rule \"...\")${RESET}"
     fi
     echo ""
 
@@ -463,11 +463,11 @@ show_ralphy_config() {
 }
 
 # Add a rule to config.yaml
-add_ralphy_rule() {
+add_morty_rule() {
   local rule="$1"
 
   if [[ ! -f "$CONFIG_FILE" ]]; then
-    log_error "No config found. Run 'ralphy --init' first."
+    log_error "No config found. Run 'morty --init' first."
     exit 1
   fi
 
@@ -545,7 +545,7 @@ $context
 
   # Add rules if available
   local rules
-  rules=$(load_ralphy_rules)
+  rules=$(load_morty_rules)
   if [[ -n "$rules" ]]; then
     prompt+="## Rules (you MUST follow these)
 $rules
@@ -564,7 +564,7 @@ $rules
 
   # Add boundaries
   local never_touch
-  never_touch=$(load_ralphy_boundaries "never_touch")
+  never_touch=$(load_morty_boundaries "never_touch")
   if [[ -n "$never_touch" ]]; then
     prompt+="## Boundaries
 Do NOT modify these files/directories:
@@ -677,15 +677,15 @@ run_brownfield_task() {
 
 show_help() {
   cat << EOF
-${BOLD}Ralphy${RESET} - Autonomous AI Coding Loop (v${VERSION})
+${BOLD}Morty${RESET} - Autonomous AI Coding Loop (v${VERSION})
 
 ${BOLD}USAGE:${RESET}
-  ./ralphy.sh [options]              # PRD mode (requires PRD.md)
-  ./ralphy.sh "task description"     # Single task mode (brownfield)
-  ./ralphy.sh --init                 # Initialize .ralphy/ config
+  ./morty.sh [options]              # PRD mode (requires PRD.md)
+  ./morty.sh "task description"     # Single task mode (brownfield)
+  ./morty.sh --init                 # Initialize .morty/ config
 
 ${BOLD}CONFIG & SETUP:${RESET}
-  --init              Initialize .ralphy/ with smart defaults
+  --init              Initialize .morty/ with smart defaults
   --config            Show current configuration
   --add-rule "..."    Add a rule to config (e.g., "Always use Zod")
 
@@ -744,18 +744,18 @@ ${BOLD}OTHER OPTIONS:${RESET}
 
 ${BOLD}EXAMPLES:${RESET}
   # Brownfield mode (single tasks in existing projects)
-  ./ralphy.sh --init                       # Initialize config
-  ./ralphy.sh "add dark mode toggle"       # Run single task
-  ./ralphy.sh "fix the login bug" --cursor # Single task with Cursor
-  ./ralphy.sh "test the login flow" --browser  # Task with browser automation
+  ./morty.sh --init                       # Initialize config
+  ./morty.sh "add dark mode toggle"       # Run single task
+  ./morty.sh "fix the login bug" --cursor # Single task with Cursor
+  ./morty.sh "test the login flow" --browser  # Task with browser automation
 
   # PRD mode (task lists)
-  ./ralphy.sh                              # Run with Claude Code
-  ./ralphy.sh --codex                      # Run with Codex CLI
-  ./ralphy.sh --branch-per-task --create-pr  # Feature branch workflow
-  ./ralphy.sh --parallel --max-parallel 4  # Run 4 tasks concurrently
-  ./ralphy.sh --yaml tasks.yaml            # Use YAML task file
-  ./ralphy.sh --github owner/repo          # Fetch from GitHub issues
+  ./morty.sh                              # Run with Claude Code
+  ./morty.sh --codex                      # Run with Codex CLI
+  ./morty.sh --branch-per-task --create-pr  # Feature branch workflow
+  ./morty.sh --parallel --max-parallel 4  # Run 4 tasks concurrently
+  ./morty.sh --yaml tasks.yaml            # Use YAML task file
+  ./morty.sh --github owner/repo          # Fetch from GitHub issues
 
 ${BOLD}PRD FORMATS:${RESET}
   Markdown (PRD.md):
@@ -774,7 +774,7 @@ EOF
 }
 
 show_version() {
-  echo "Ralphy v${VERSION}"
+  echo "Morty v${VERSION}"
 }
 
 # ============================================
@@ -1047,7 +1047,7 @@ check_requirements() {
       claude|cursor)
         log_error "Running as root is not supported with $AI_ENGINE."
         log_info "The --dangerously-skip-permissions flag cannot be used as root for security reasons."
-        log_info "Please run Ralphy as a non-root user, or use a different AI engine (--opencode, --codex, --qwen, --droid, --copilot)."
+        log_info "Please run Morty as a non-root user, or use a different AI engine (--opencode, --codex, --qwen, --droid, --copilot)."
         exit 1
         ;;
       *)
@@ -1075,21 +1075,21 @@ check_requirements() {
 
   # Check for git
   if ! command -v git &>/dev/null; then
-    log_error "git is required but not installed. Install git before running Ralphy."
+    log_error "git is required but not installed. Install git before running Morty."
     exit 1
   fi
 
   # Check if we're in a git repository
   if ! git rev-parse --git-dir >/dev/null 2>&1; then
-    log_error "Not a git repository. Ralphy requires a git repository to track changes."
+    log_error "Not a git repository. Morty requires a git repository to track changes."
     exit 1
   fi
 
-  # Ensure .ralphy/ directory exists and create progress.txt if missing
-  mkdir -p "$RALPHY_DIR"
+  # Ensure .morty/ directory exists and create progress.txt if missing
+  mkdir -p "$MORTY_DIR"
   if [[ ! -f "$PROGRESS_FILE" ]]; then
     log_info "Creating $PROGRESS_FILE..."
-    echo "# Ralphy Progress Log" > "$PROGRESS_FILE"
+    echo "# Morty Progress Log" > "$PROGRESS_FILE"
     echo "" >> "$PROGRESS_FILE"
   fi
 
@@ -1328,16 +1328,16 @@ mark_task_complete() {
 
 create_task_branch() {
   local task=$1
-  local branch_name="ralphy/$(slugify "$task")"
+  local branch_name="morty/$(slugify "$task")"
 
   log_debug "Creating branch: $branch_name from $BASE_BRANCH"
 
   # Stash any changes (only pop if a new stash was created)
   local stash_before stash_after stashed=false
   stash_before=$(git stash list -1 --format='%gd %s' 2>/dev/null || true)
-  git stash push -m "ralphy-autostash" >/dev/null 2>&1 || true
+  git stash push -m "morty-autostash" >/dev/null 2>&1 || true
   stash_after=$(git stash list -1 --format='%gd %s' 2>/dev/null || true)
-  if [[ -n "$stash_after" ]] && [[ "$stash_after" != "$stash_before" ]] && [[ "$stash_after" == *"ralphy-autostash"* ]]; then
+  if [[ -n "$stash_after" ]] && [[ "$stash_after" != "$stash_before" ]] && [[ "$stash_after" == *"morty-autostash"* ]]; then
     stashed=true
   fi
 
@@ -1361,7 +1361,7 @@ create_task_branch() {
 create_pull_request() {
   local branch=$1
   local task=$2
-  local body="${3:-Automated PR created by Ralphy}"
+  local body="${3:-Automated PR created by Morty}"
 
   local draft_flag=""
   [[ "$PR_DRAFT" == true ]] && draft_flag="--draft"
@@ -1468,7 +1468,7 @@ monitor_progress() {
 # ============================================
 
 notify_done() {
-  local message="${1:-Ralphy has completed all tasks!}"
+  local message="${1:-Morty has completed all tasks!}"
 
   # macOS
   if command -v afplay &>/dev/null; then
@@ -1477,12 +1477,12 @@ notify_done() {
 
   # macOS notification
   if command -v osascript &>/dev/null; then
-    osascript -e "display notification \"$message\" with title \"Ralphy\"" 2>/dev/null || true
+    osascript -e "display notification \"$message\" with title \"Morty\"" 2>/dev/null || true
   fi
 
   # Linux (notify-send)
   if command -v notify-send &>/dev/null; then
-    notify-send "Ralphy" "$message" 2>/dev/null || true
+    notify-send "Morty" "$message" 2>/dev/null || true
   fi
 
   # Linux (paplay for sound)
@@ -1497,16 +1497,16 @@ notify_done() {
 }
 
 notify_error() {
-  local message="${1:-Ralphy encountered an error}"
+  local message="${1:-Morty encountered an error}"
 
   # macOS
   if command -v osascript &>/dev/null; then
-    osascript -e "display notification \"$message\" with title \"Ralphy - Error\"" 2>/dev/null || true
+    osascript -e "display notification \"$message\" with title \"Morty - Error\"" 2>/dev/null || true
   fi
 
   # Linux
   if command -v notify-send &>/dev/null; then
-    notify-send -u critical "Ralphy - Error" "$message" 2>/dev/null || true
+    notify-send -u critical "Morty - Error" "$message" 2>/dev/null || true
   fi
 }
 
@@ -1518,8 +1518,8 @@ build_prompt() {
   local task_override="${1:-}"
   local prompt=""
 
-  # Add .ralphy/ config if available (works with PRD mode too)
-  if [[ -d "$RALPHY_DIR" ]]; then
+  # Add .morty/ config if available (works with PRD mode too)
+  if [[ -d "$MORTY_DIR" ]]; then
     # Add project context
     local context
     context=$(load_project_context)
@@ -1532,7 +1532,7 @@ $context
 
     # Add rules
     local rules
-    rules=$(load_ralphy_rules)
+    rules=$(load_morty_rules)
     if [[ -n "$rules" ]]; then
       prompt+="## Rules (you MUST follow these)
 $rules
@@ -1542,7 +1542,7 @@ $rules
 
     # Add boundaries
     local never_touch
-    never_touch=$(load_ralphy_boundaries "never_touch")
+    never_touch=$(load_morty_boundaries "never_touch")
     if [[ -n "$never_touch" ]]; then
       prompt+="## Boundaries - Do NOT modify these files:
 $never_touch
@@ -2046,7 +2046,7 @@ run_single_task() {
 
     # Create PR if requested
     if [[ "$CREATE_PR" == true ]] && [[ -n "$branch_name" ]]; then
-      create_pull_request "$branch_name" "$current_task" "Automated implementation by Ralphy"
+      create_pull_request "$branch_name" "$current_task" "Automated implementation by Morty"
     fi
 
     # Return to base branch
@@ -2082,7 +2082,7 @@ run_single_task() {
 create_agent_worktree() {
   local task_name="$1"
   local agent_num="$2"
-  local branch_name="ralphy/agent-${agent_num}-$(slugify "$task_name")"
+  local branch_name="morty/agent-${agent_num}-$(slugify "$task_name")"
   local worktree_dir="${WORKTREE_BASE}/agent-${agent_num}"
 
   # Run git commands from original directory
@@ -2177,8 +2177,8 @@ run_parallel_agent() {
     cp "$ORIGINAL_DIR/$PRD_FILE" "$worktree_dir/" 2>/dev/null || true
   fi
 
-  # Ensure .ralphy/ and progress.txt exist in worktree
-  mkdir -p "$worktree_dir/$RALPHY_DIR"
+  # Ensure .morty/ and progress.txt exist in worktree
+  mkdir -p "$worktree_dir/$MORTY_DIR"
   touch "$worktree_dir/$PROGRESS_FILE"
 
   # Build prompt for this specific task
@@ -2324,7 +2324,7 @@ Focus only on implementing: $task_name"
           --base "$BASE_BRANCH" \
           --head "$branch_name" \
           --title "$task_name" \
-          --body "Automated implementation by Ralphy (Agent $agent_num)" \
+          --body "Automated implementation by Morty (Agent $agent_num)" \
           ${PR_DRAFT:+--draft} 2>>"$log_file" || true
       )
     fi
@@ -2611,7 +2611,7 @@ run_parallel_tasks() {
     # so the next group sees the completed work (fixes issue #13)
     # NOTE: Uses git branch instead of git checkout to avoid changing HEAD while worktrees are active (Greptile review)
     if [[ "$PRD_SOURCE" == "yaml" ]] && [[ ${#group_completed_branches[@]} -gt 0 ]] && [[ ${#groups[@]} -gt 1 ]]; then
-      local integration_branch="ralphy/integration-group-$group"
+      local integration_branch="morty/integration-group-$group"
       log_info "Creating integration branch for group $group: $integration_branch"
 
       # Create integration branch from current BASE_BRANCH without switching HEAD
@@ -2964,19 +2964,19 @@ main() {
 
   # Handle --init mode
   if [[ "$INIT_MODE" == true ]]; then
-    init_ralphy_config
+    init_morty_config
     exit 0
   fi
 
   # Handle --config mode
   if [[ "$SHOW_CONFIG" == true ]]; then
-    show_ralphy_config
+    show_morty_config
     exit 0
   fi
 
   # Handle --add-rule
   if [[ -n "$ADD_RULE" ]]; then
-    add_ralphy_rule "$ADD_RULE"
+    add_morty_rule "$ADD_RULE"
     exit 0
   fi
 
@@ -3004,7 +3004,7 @@ main() {
 
     # Show brownfield banner
     echo "${BOLD}============================================${RESET}"
-    echo "${BOLD}Ralphy${RESET} - Single Task Mode"
+    echo "${BOLD}Morty${RESET} - Single Task Mode"
     local engine_display
     case "$AI_ENGINE" in
       opencode) engine_display="${CYAN}OpenCode${RESET}" ;;
@@ -3016,8 +3016,8 @@ main() {
       *) engine_display="${MAGENTA}Claude Code${RESET}" ;;
     esac
     echo "Engine: $engine_display"
-    if [[ -d "$RALPHY_DIR" ]]; then
-      echo "Config: ${GREEN}$RALPHY_DIR/${RESET}"
+    if [[ -d "$MORTY_DIR" ]]; then
+      echo "Config: ${GREEN}$MORTY_DIR/${RESET}"
     else
       echo "Config: ${DIM}none (run --init to configure)${RESET}"
     fi
@@ -3040,7 +3040,7 @@ main() {
 
   # Show banner
   echo "${BOLD}============================================${RESET}"
-  echo "${BOLD}Ralphy${RESET} - Running until PRD is complete"
+  echo "${BOLD}Morty${RESET} - Running until PRD is complete"
   local engine_display
   case "$AI_ENGINE" in
     opencode) engine_display="${CYAN}OpenCode${RESET}" ;;
@@ -3053,8 +3053,8 @@ main() {
   esac
   echo "Engine: $engine_display"
   echo "Source: ${CYAN}$PRD_SOURCE${RESET} (${PRD_FILE:-$GITHUB_REPO})"
-  if [[ -d "$RALPHY_DIR" ]]; then
-    echo "Config: ${GREEN}$RALPHY_DIR/${RESET} (rules loaded)"
+  if [[ -d "$MORTY_DIR" ]]; then
+    echo "Config: ${GREEN}$MORTY_DIR/${RESET} (rules loaded)"
   fi
 
   local mode_parts=()
@@ -3105,7 +3105,7 @@ main() {
     if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $iteration -ge $MAX_ITERATIONS ]]; then
       log_warn "Reached max iterations ($MAX_ITERATIONS)"
       show_summary
-      notify_done "Ralphy stopped after $MAX_ITERATIONS iterations"
+      notify_done "Morty stopped after $MAX_ITERATIONS iterations"
       exit 0
     fi
 

@@ -9,122 +9,122 @@ import { slugify } from "./branch.ts";
  * Combines timestamp with random suffix to prevent collisions
  */
 function generateUniqueId(): string {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	return `${timestamp}-${random}`;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${timestamp}-${random}`;
 }
 
 /**
  * Create a worktree for parallel agent execution
  */
 export async function createAgentWorktree(
-	taskName: string,
-	agentNum: number,
-	baseBranch: string,
-	worktreeBase: string,
-	originalDir: string,
+  taskName: string,
+  agentNum: number,
+  baseBranch: string,
+  worktreeBase: string,
+  originalDir: string,
 ): Promise<{ worktreeDir: string; branchName: string }> {
-	const uniqueId = generateUniqueId();
-	const branchName = `ralphy/agent-${agentNum}-${uniqueId}-${slugify(taskName)}`;
-	const worktreeDir = join(worktreeBase, `agent-${agentNum}-${uniqueId}`);
+  const uniqueId = generateUniqueId();
+  const branchName = `morty/agent-${agentNum}-${uniqueId}-${slugify(taskName)}`;
+  const worktreeDir = join(worktreeBase, `agent-${agentNum}-${uniqueId}`);
 
-	const git: SimpleGit = simpleGit(originalDir);
+  const git: SimpleGit = simpleGit(originalDir);
 
-	// Prune stale worktrees first
-	await git.raw(["worktree", "prune"]);
+  // Prune stale worktrees first
+  await git.raw(["worktree", "prune"]);
 
-	// Remove existing worktree dir if any (from previous failed runs)
-	if (existsSync(worktreeDir)) {
-		rmSync(worktreeDir, { recursive: true, force: true });
-		// Prune again after removing directory
-		await git.raw(["worktree", "prune"]);
-	}
+  // Remove existing worktree dir if any (from previous failed runs)
+  if (existsSync(worktreeDir)) {
+    rmSync(worktreeDir, { recursive: true, force: true });
+    // Prune again after removing directory
+    await git.raw(["worktree", "prune"]);
+  }
 
-	// Use atomic -B flag to create/reset branch in one operation
-	// This eliminates the race condition between delete and create
-	await git.raw(["worktree", "add", "-B", branchName, worktreeDir, baseBranch]);
+  // Use atomic -B flag to create/reset branch in one operation
+  // This eliminates the race condition between delete and create
+  await git.raw(["worktree", "add", "-B", branchName, worktreeDir, baseBranch]);
 
-	return { worktreeDir, branchName };
+  return { worktreeDir, branchName };
 }
 
 /**
  * Cleanup a worktree after agent completes
  */
 export async function cleanupAgentWorktree(
-	worktreeDir: string,
-	_branchName: string,
-	originalDir: string,
+  worktreeDir: string,
+  _branchName: string,
+  originalDir: string,
 ): Promise<{ leftInPlace: boolean }> {
-	// Check for uncommitted changes
-	if (existsSync(worktreeDir)) {
-		const worktreeGit = simpleGit(worktreeDir);
-		const status = await worktreeGit.status();
+  // Check for uncommitted changes
+  if (existsSync(worktreeDir)) {
+    const worktreeGit = simpleGit(worktreeDir);
+    const status = await worktreeGit.status();
 
-		if (status.files.length > 0) {
-			// Leave worktree in place due to uncommitted changes
-			return { leftInPlace: true };
-		}
-	}
+    if (status.files.length > 0) {
+      // Leave worktree in place due to uncommitted changes
+      return { leftInPlace: true };
+    }
+  }
 
-	// Remove the worktree
-	const git: SimpleGit = simpleGit(originalDir);
-	try {
-		await git.raw(["worktree", "remove", "-f", worktreeDir]);
-	} catch (error) {
-		const errorMsg = error instanceof Error ? error.message : String(error);
-		logDebug(`Failed to remove worktree ${worktreeDir}: ${errorMsg}`);
-	}
+  // Remove the worktree
+  const git: SimpleGit = simpleGit(originalDir);
+  try {
+    await git.raw(["worktree", "remove", "-f", worktreeDir]);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    logDebug(`Failed to remove worktree ${worktreeDir}: ${errorMsg}`);
+  }
 
-	// Don't delete branch - it may have commits we want to keep/PR
-	return { leftInPlace: false };
+  // Don't delete branch - it may have commits we want to keep/PR
+  return { leftInPlace: false };
 }
 
 /**
  * Get worktree base directory (creates if needed)
  */
 export function getWorktreeBase(workDir: string): string {
-	const worktreeBase = join(workDir, ".ralphy-worktrees");
-	if (!existsSync(worktreeBase)) {
-		mkdirSync(worktreeBase, { recursive: true });
-	}
-	return worktreeBase;
+  const worktreeBase = join(workDir, ".morty-worktrees");
+  if (!existsSync(worktreeBase)) {
+    mkdirSync(worktreeBase, { recursive: true });
+  }
+  return worktreeBase;
 }
 
 /**
- * List all ralphy worktrees
+ * List all morty worktrees
  */
 export async function listWorktrees(workDir: string): Promise<string[]> {
-	const git: SimpleGit = simpleGit(workDir);
-	const output = await git.raw(["worktree", "list", "--porcelain"]);
+  const git: SimpleGit = simpleGit(workDir);
+  const output = await git.raw(["worktree", "list", "--porcelain"]);
 
-	const worktrees: string[] = [];
-	const lines = output.split("\n");
+  const worktrees: string[] = [];
+  const lines = output.split("\n");
 
-	for (const line of lines) {
-		if (line.startsWith("worktree ") && line.includes(".ralphy-worktrees")) {
-			worktrees.push(line.replace("worktree ", ""));
-		}
-	}
+  for (const line of lines) {
+    if (line.startsWith("worktree ") && line.includes(".morty-worktrees")) {
+      worktrees.push(line.replace("worktree ", ""));
+    }
+  }
 
-	return worktrees;
+  return worktrees;
 }
 
 /**
- * Clean up all ralphy worktrees
+ * Clean up all morty worktrees
  */
 export async function cleanupAllWorktrees(workDir: string): Promise<void> {
-	const git: SimpleGit = simpleGit(workDir);
-	const worktrees = await listWorktrees(workDir);
+  const git: SimpleGit = simpleGit(workDir);
+  const worktrees = await listWorktrees(workDir);
 
-	for (const worktree of worktrees) {
-		try {
-			await git.raw(["worktree", "remove", "-f", worktree]);
-		} catch (error) {
-			const errorMsg = error instanceof Error ? error.message : String(error);
-			logDebug(`Failed to remove worktree ${worktree}: ${errorMsg}`);
-		}
-	}
+  for (const worktree of worktrees) {
+    try {
+      await git.raw(["worktree", "remove", "-f", worktree]);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      logDebug(`Failed to remove worktree ${worktree}: ${errorMsg}`);
+    }
+  }
 
-	// Prune any stale worktrees
-	await git.raw(["worktree", "prune"]);
+  // Prune any stale worktrees
+  await git.raw(["worktree", "prune"]);
 }

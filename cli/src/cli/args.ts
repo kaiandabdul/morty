@@ -2,7 +2,7 @@ import { existsSync, statSync } from "node:fs";
 import { Command } from "commander";
 import type { RuntimeOptions } from "../config/types.ts";
 
-const VERSION = "4.3.0";
+const VERSION = "5.0.0";
 
 /**
  * Create the CLI program with all options
@@ -11,13 +11,13 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name("ralphy")
+    .name("morty")
     .description(
-      "Autonomous AI Coding Loop - Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code, Factory Droid and GitHub Copilot",
+      "Autonomous AI Coding Loop - Run AI agents on tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code, Factory Droid and GitHub Copilot",
     )
     .version(VERSION)
     .argument("[task]", "Single task to execute (brownfield mode)")
-    .option("--init", "Initialize .ralphy/ configuration")
+    .option("--init", "Initialize .morty/ configuration")
     .option("--config", "Show current configuration")
     .option("--add-rule <rule>", "Add a rule to config")
     .option("--no-tests, --skip-tests", "Skip running tests")
@@ -109,9 +109,9 @@ export function parseArgs(args: string[]): {
     }
   }
 
-	// Handle --fast
-	const skipTests = opts.fast || opts.skipTests;
-	const skipLint = opts.fast || opts.skipLint;
+  // Handle --fast
+  const skipTests = opts.fast || opts.skipTests;
+  const skipLint = opts.fast || opts.skipLint;
 
   const options: RuntimeOptions = {
     skipTests,
@@ -157,7 +157,7 @@ export function parseArgs(args: string[]): {
  * Print version
  */
 export function printVersion(): void {
-  console.log(`ralphy v${VERSION}`);
+  console.log(`morty v${VERSION}`);
 }
 
 /**

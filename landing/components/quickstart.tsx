@@ -11,8 +11,8 @@ export function Quickstart() {
             </h3>
             <pre className="bg-neutral-50 border border-neutral-200 rounded p-3 text-sm overflow-x-auto">
               <code className="text-neutral-700">
-                {`ralphy "add dark mode toggle"
-ralphy "fix the auth bug" --cursor`}
+                {`morty "add dark mode toggle"
+morty "fix the auth bug" --cursor`}
               </code>
             </pre>
           </div>
@@ -23,8 +23,8 @@ ralphy "fix the auth bug" --cursor`}
             </h3>
             <pre className="bg-neutral-50 border border-neutral-200 rounded p-3 text-sm overflow-x-auto">
               <code className="text-neutral-700">
-                {`ralphy --prd PRD.md
-ralphy --github owner/repo --label "ai-task"`}
+                {`morty --prd PRD.md
+morty --github owner/repo --label "ai-task"`}
               </code>
             </pre>
           </div>
@@ -35,7 +35,7 @@ ralphy --github owner/repo --label "ai-task"`}
             </h3>
             <pre className="bg-neutral-50 border border-neutral-200 rounded p-3 text-sm overflow-x-auto">
               <code className="text-neutral-700">
-                {`ralphy --prd PRD.md --parallel --max-parallel 5`}
+                {`morty --prd PRD.md --parallel --max-parallel 5`}
               </code>
             </pre>
           </div>
@@ -46,8 +46,8 @@ ralphy --github owner/repo --label "ai-task"`}
             </h3>
             <pre className="bg-neutral-50 border border-neutral-200 rounded p-3 text-sm overflow-x-auto">
               <code className="text-neutral-700">
-                {`ralphy --init
-ralphy --add-rule "use TypeScript strict mode"`}
+                {`morty --init
+morty --add-rule "use TypeScript strict mode"`}
               </code>
             </pre>
           </div>

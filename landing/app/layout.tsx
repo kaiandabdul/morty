@@ -3,10 +3,10 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ralphy.goshen.fyi"),
+  metadataBase: new URL("https://morty.goshen.fyi"),
   title: {
-    default: "Ralphy - Autonomous AI Coding Loop",
-    template: "%s | Ralphy",
+    default: "Morty - Autonomous AI Coding Loop",
+    template: "%s | Morty",
   },
   description:
     "Run AI agents on your tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid.",
@@ -22,10 +22,12 @@ export const metadata: Metadata = {
     "AI agent",
     "code automation",
     "developer tools",
+    "Morty",
+    "vibecoding",
   ],
-  authors: [{ name: "Ralphy Team" }],
-  creator: "Ralphy",
-  publisher: "Ralphy",
+  authors: [{ name: "Morty Team" }],
+  creator: "Morty",
+  publisher: "Morty",
   robots: {
     index: true,
     follow: true,
@@ -38,31 +40,31 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Ralphy - Autonomous AI Coding Loop",
+    title: "Morty - Autonomous AI Coding Loop",
     description:
       "Run AI agents on your tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid.",
     type: "website",
-    url: "https://ralphy.goshen.fyi",
-    siteName: "Ralphy",
+    url: "https://morty.goshen.fyi",
+    siteName: "Morty",
     images: [
       {
-        url: "/ralphy.jpeg",
+        url: "/morty.jpeg",
         width: 1200,
         height: 630,
-        alt: "Ralphy - Autonomous AI Coding Loop",
+        alt: "Morty - Autonomous AI Coding Loop",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ralphy - Autonomous AI Coding Loop",
+    title: "Morty - Autonomous AI Coding Loop",
     description:
       "Run AI agents on your tasks until done. Supports Claude Code, OpenCode, Codex, Cursor, Qwen-Code and Factory Droid.",
-    images: ["/ralphy.jpeg"],
+    images: ["/morty.jpeg"],
     creator: "@rasmic",
   },
   alternates: {
-    canonical: "https://ralphy.goshen.fyi",
+    canonical: "https://morty.goshen.fyi",
   },
   icons: {
     icon: "/logo.png",
